@@ -13,15 +13,16 @@ current_filename = ""
 
 def process_sync_tag(matchobj):
     global last_sync
+    print_interval = 30000 # ms
     current_sync = int( matchobj.group(1) )
     if current_sync < last_sync:
         if last_sync - current_sync >= 10000:
             print "%s: %d (last: %d)"%(current_filename, current_sync, last_sync)
             return ""
     
-    if (current_sync / 30000) != (last_sync / 30000):
+    if (current_sync / print_interval) != (last_sync / print_interval):
         last_sync = current_sync
-        current_sync = (current_sync / 30000)*30000
+        current_sync = (current_sync / print_interval)*print_interval
         return "[%02d:%02d] "%(current_sync/60000,(current_sync%60000)/1000 )
     else:
         return ""
@@ -56,7 +57,7 @@ def strip_smi(filename):
     rec_sync = re.compile(r"""<SYNC[^>]+START=([0-9]+)>""", re.IGNORECASE)
     smi_content = rec_sync.sub(process_sync_tag, smi_content)
 
-    # replace CR/NF
+    # replace CR/LF
     rec_remove_crlf = re.compile(r"""(?:\n|\r|\r\n?)""")
     smi_content = rec_remove_crlf.sub("\n", smi_content)
 
